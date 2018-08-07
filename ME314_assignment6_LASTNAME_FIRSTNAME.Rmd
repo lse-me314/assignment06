@@ -4,16 +4,13 @@ author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
 output: html_document
 ---
 
-You will need to load the core library for the course textbook:
-```{r}
-library(ISLR)
-```
-
-
 ## Exercise 6.1
 
 In the lab session for this topic (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the `cv.glm()` function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the `glm()` and `predict.glm()` functions, and a `for` loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the `Weekly` data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).
 
+```{r}
+data("Weekly", package = "ISLR")
+```
 
  (a) Fit a logistic regression model that predicts `Direction` using `Lag1` and `Lag2`.
 
@@ -38,6 +35,10 @@ In the lab session for this topic (Sections 5.3.2 and 5.3.3 in James et al.), we
 
 In this exercise, we will predict the number of applications received using the other variables in the `College` data set.
 
+```{r}
+data("College", package = "ISLR")
+```
+
 (a) Split the data set into a training set and a test set.
 (b) Fit a linear model using least squares on the training set, and
 report the test error obtained.
@@ -50,6 +51,10 @@ report the test error obtained.
 ## Exercise 6.3 (Optional)
 
 We will now try to predict per capita crime rate in the `Boston` data set.
+
+```{r}
+data("Boston", package = "ISLR")
+```
 
 (a) Try out some of the regression methods we explored, such as the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
 (b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
