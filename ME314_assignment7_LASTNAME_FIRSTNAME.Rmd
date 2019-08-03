@@ -1,10 +1,10 @@
 ---
-title: "Exercise 6 - Resampling Methods and Model Selection"
+title: "Exercise 7 - Resampling Methods and Model Selection"
 author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
 output: html_document
 ---
 
-## Exercise 6.1
+## Exercise 7.1
 
 In the lab session for this topic (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the `cv.glm()` function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the `glm()` and `predict.glm()` functions, and a `for` loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the `Weekly` data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).
 
@@ -31,7 +31,7 @@ data("Weekly", package = "ISLR")
  (e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
 
 
-## Exercise 6.2
+## Exercise 7.2
 
 In this exercise, we will predict the number of applications received using the other variables in the `College` data set.
 
@@ -48,7 +48,7 @@ report the test error obtained.
 (f) Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
 
 
-## Exercise 6.3 (Optional)
+## Exercise 7.3 (Optional)
 
 We will now try to predict per capita crime rate in the `Boston` data set.
 

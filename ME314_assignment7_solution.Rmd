@@ -1,5 +1,5 @@
 ---
-title: "Exercise 6 - Resampling Methods and Model Selection"
+title: "Exercise 7 - Resampling Methods and Model Selection"
 author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
 output: html_document
 ---
@@ -11,7 +11,7 @@ library(ISLR)
 ```
 
 
-## Exercise 6.1
+## Exercise 7.1
 
 In the lab session for this topic (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the `cv.glm()` function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the `glm()` and `predict.glm()` functions, and a `for` loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the `Weekly` data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).
 
@@ -86,7 +86,7 @@ mean(count)
 
 **LOOCV estimates a test error rate of 45%.** 
 
-## Exercise 6.2
+## Exercise 7.2
 
 In this exercise, we will predict the number of applications received using the other variables in the `College` data set.
 
@@ -199,7 +199,7 @@ barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2, pcr.test.r2),
 **The plot shows that test $R^2$ for all models except PCR are around 0.9. PCR has a smaller test $R^2$ of less than 0.8. All models except PCR predict college applications with high accuracy.** 
 
 
-## Exercise 6.3 (Optional)
+## Exercise 7.3 (Optional)
 
 We will now try to predict per capita crime rate in the `Boston` data set.
 
