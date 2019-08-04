@@ -1,0 +1,188 @@
+---
+title: "Exercise 6 - Nonlinear Models and Tree-based Methods"
+author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
+output: html_document
+---
+
+### Exercise 6.1
+
+This question relates to the `College` dataset from the `ISLR` package.
+
+(a) Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform appropriate model selection of your choice (from day6) on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+
+```{r}
+library(ISLR)
+library(glmnet)
+library(leaps)
+```
+
+```{r}
+set.seed(11)
+sum(is.na(College))
+train.size <-  nrow(College) / 2
+train <-  sample(1:nrow(College), train.size)
+test <-  -train
+College.train <-  College[train, ]
+College.test <-  College[test, ]
+train.mat <-  model.matrix(Outstate ~ . , data = College.train)
+test.mat <-  model.matrix(Outstate ~ . , data = College.test)
+grid <-  10 ^ seq(4, -2, length = 100)
+```
+
+
+```{r}
+mod.lasso <-  cv.glmnet(train.mat, College.train[, "Outstate"], alpha = 1, 
+                        lambda = grid, thresh = 1e-12)
+
+lambda.best <-  mod.lasso$lambda.min
+lambda.best
+
+lasso <- glmnet(train.mat, College.train[, "Outstate"], alpha = 1, lambda = grid)
+
+lasso.coef <-  predict(lasso, type= "coefficients", s = lambda.best)
+lasso.coef
+
+```
+
+**LASSO hasn't dropped any variables from our model, so it was a very successful attempt at model selection. Other approaches have been covered in the chapter (although not in the lecture). Best subset selection is a brute force approach but may be useful if we are determined in reducing the size of our model.**
+
+
+
+```{r}
+set.seed(1)
+
+train <-  sample(1:nrow(College), nrow(College)/2)
+test <-  -train
+College.train <-  College[train, ]
+College.test <-  College[test, ]
+
+reg.fit <-  regsubsets(Outstate~., data=College.train, nvmax=17, method="forward")
+
+reg.summary <-  summary(reg.fit)
+```
+
+```{r}
+par(mfrow=c(1, 3))
+plot(reg.summary$cp,xlab="Number of Variables",ylab="Cp",type='l')
+min.cp <-  min(reg.summary$cp)
+std.cp <-  sd(reg.summary$cp)
+abline(h=min.cp+0.2*std.cp, col="red", lty=2)
+abline(h=min.cp-0.2*std.cp, col="red", lty=2)
+plot(reg.summary$bic,xlab="Number of Variables",ylab="BIC",type='l')
+min.bic <-  min(reg.summary$bic)
+std.bic <-  sd(reg.summary$bic)
+abline(h=min.bic+0.2*std.bic, col="red", lty=2)
+abline(h=min.bic-0.2*std.bic, col="red", lty=2)
+plot(reg.summary$adjr2,xlab="Number of Variables",
+     ylab="Adjusted R2",type='l', ylim=c(0.4, 0.84))
+max.adjr2 <-  max(reg.summary$adjr2)
+std.adjr2 <-  sd(reg.summary$adjr2)
+abline(h=max.adjr2+0.2*std.adjr2, col="red", lty=2)
+abline(h=max.adjr2-0.2*std.adjr2, col="red", lty=2)
+```
+
+**BIC scores show 6 as the optimal size. Cp, BIC and adjr2 show that size 6 is the minimum size for the subset for which the scores are withing 0.2 standard deviations of optimum. We pick 6 as the best subset size and find best 6 variables using entire data.**
+
+```{r}
+reg.fit <-  regsubsets(Outstate ~ . , data=College, method="forward")
+coefi <-  coef(reg.fit, id=6)
+names(coefi)
+```
+
+
+(b) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+
+```{r}
+library(gam)
+gam.fit <-  gam(Outstate ~ Private + ns(Room.Board, df=2) + 
+                  ns(PhD, df=2) + ns(perc.alumni, df=2) + 
+                  ns(Expend, df=5) + ns(Grad.Rate, df=2),
+                data=College.train)
+par(mfrow=c(2, 3))
+plot(gam.fit, se=TRUE, col="blue")
+```
+
+** We discussed this type of graphs in the lecture. The fitted natural splines with +/- 2*SE confidence interval. Ticks at the bottom show density of the data (aka `rug plot').**
+
+(c) Evaluate the model obtained on the test set, and explain the results obtained.
+
+```{r}
+gam.pred <-  predict(gam.fit, College.test)
+gam.err <-  mean((College.test$Outstate - gam.pred)^2)
+gam.err
+gam.tss <-  mean((College.test$Outstate - mean(College.test$Outstate))^2)
+test.rss <-  1 - gam.err / gam.tss
+test.rss
+```
+
+**We obtain a test RSS of 0.76 using GAM with 6 predictors. This is a slight improvement over a test RSS of 0.74 obtained using OLS.** 
+
+(d) For which variables, if any, is there evidence of a non-linear relationship with the response?
+
+```{r}
+summary(gam.fit)
+```
+
+**Non-parametric Anova test shows a strong evidence of non-linear relationship between response and variables.** 
+
+
+### Exercise 6.2 
+
+Apply bagging and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?
+
+**In this exercise we examine the `Weekly` stock market data from the ISLR package.**
+
+```{r}
+set.seed(1)
+summary(Weekly)
+train <-  sample(nrow(Weekly), 2/3 * nrow(Weekly))
+test <-  -train
+```
+
+**Logistic regression**
+
+```{r}
+glm.fit <-  glm(Direction ~ . -Year-Today, 
+                data=Weekly[train,], 
+                family="binomial")
+
+glm.probs <-  predict(glm.fit, newdata=Weekly[test, ], 
+                      type = "response")
+glm.pred <-  rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <-  "Up"
+table(glm.pred, Weekly$Direction[test])
+mean(glm.pred != Weekly$Direction[test])
+```
+
+
+**Bagging**
+
+```{r}
+library(randomForest)
+
+Weekly <-  Weekly[,!(names(Weekly) %in% c("BinomialDirection"))]
+
+bag.weekly <-  randomForest(Direction~.-Year-Today, 
+                            data=Weekly, 
+                            subset=train, 
+                            mtry=6)
+
+yhat.bag <-  predict(bag.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])
+mean(yhat.bag != Weekly$Direction[test])
+```
+
+**Random forests**
+
+```{r}
+rf.weekly <-  randomForest(Direction ~ . -Year-Today, 
+                           data=Weekly, 
+                           subset=train, 
+                           mtry=2)
+
+yhat.bag <-  predict(rf.weekly, newdata=Weekly[test,])
+table(yhat.bag, Weekly$Direction[test])
+mean(yhat.bag != Weekly$Direction[test])
+```
+
+**Best performance summary: Bagging resulted in the lowest validation set test error rate.**

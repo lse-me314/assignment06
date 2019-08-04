@@ -1,0 +1,20 @@
+---
+title: "Exercise 6 - Nonlinear Models and Tree-based Methods"
+author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
+output: html_document
+---
+
+
+### Exercise 6.1
+
+This question relates to the `College` dataset from the `ISLR` package.
+
+(a) Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform appropriate model selection of your choice (from day6) on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+(b) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+(c) Evaluate the model obtained on the test set, and explain the results obtained.
+(d) For which variables, if any, is there evidence of a non-linear relationship with the response?
+
+### Exercise 6.2 
+
+Apply bagging and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?
+
