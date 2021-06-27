@@ -1,0 +1,174 @@
+---
+title: "Setting seeds and Functions in R"
+author: "Sarah Jewett"
+date: "Summer 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## set.seed()
+
+`set.seed()` ensures you get the same results when random sampling and can reproduce the results from your code each time. It sets the initial seed, or the same starting number.
+
+Let's try running `sample(10)` twice, setting the seed each time:
+
+```{r}
+set.seed(1)
+sample(10)
+
+set.seed(1)
+sample(10)
+```
+
+You can see we get the same 10 random numbers.  Now let's try running `sample(10)` a few more time without setting our seed: 
+
+```{r}
+sample(10)
+
+sample(10)
+```
+
+you can see here that it's changing each time. But again, using `set.seed(1)` gives us the same rnadom ten numbers from the first r chunk. That doesn't seem very random though, if it's the same each time, right?
+
+```{r}
+set.seed(1)
+sample(10)
+```
+
+## "random"
+To go slightly deeper, random number generators in computers aren’t truly random but use equations/algorithms that create ‘randomness’ by starting with a specific number and then calculate each number thereafter on the previous number.  
+
+So when you `set.seed`, you are setting that initial number that the ‘random’ number generator starts with, subsequently applying the algorithm/equation to then create a 'random' sequence of numbers, which we can see with `sample()`. 
+
+This sequence is reproducible each time, as long as you specify that starting number/seed via `set.seed.` It’s also why `set.seed` works across different users and R sessions.
+
+Note that the number we use for `set.seed` isn't going to be the first number of the random sequence of numbers. 
+
+## seeing a function's code
+
+Just as you can use functions from base R and packages, [you can create them yourself](https://nicercode.github.io/intro/writing-functions.html) with `function()`. You can also see how pre-existing functions look as code, essentially looking under the hood of R Studio when running your code that uses these functions!
+
+To do this, instead of running `?set.seed` for documentation, you just run the name of the function without `?` or `()`:
+
+```{r}
+set.seed
+```
+Here you can see the function reference the random number algorithms, like Wichmann-Hill.
+
+As cool as this is, it's is a pretty complicated example, so let's try a simpler one like: 
+
+```{r}
+plot 
+```
+ 
+AND
+
+```{r}
+sort
+```
+
+Note that many base R functions will just show as 'primitive' and give limited insight, such as `sum`
+
+```{r echo = FALSE }
+sum
+```
+
+Now, let's try making our own function, following the lead of the resource on functions linked above. Here they calculate by "hand" the standard error of varaibles in their dataset. Let's do the same but with the Auto data and compute the SE of `$mpg` and `$weight`:
+
+```{r}
+library(ISLR)
+
+# mpg
+sqrt(var(Auto$mpg)/length(Auto$mpg))
+
+# weight
+sqrt(var(Auto$weight)/length(Auto$weight))
+
+
+```
+What is not ideal about this is that we are running the same code on different variables in the data, which if we were to do to all numeric variables in the data (especially if a large df) would get old quickly (and be quite ugly).
+
+BUT let's not take for granted that the code works -- and as a beginner, that's perfect, even if it ain't pretty! Good code runs, regardless of elegance. As you get more advanced, writing a function specific to your needs will make your life easier.
+
+So, let's make computing the standard error a function using the `function()` function (say that 5x fast)!
+
+```{r}
+
+standard.error <- function(x) {
+    sqrt(var(x)/length(x))
+}
+
+```
+
+`(x)` in this case is the variable we want to use in computing the SE. Above we used `$weight` and `$mpg`, but this function will now mean we only need to refer to the variable once as such:
+
+```{r}
+# mpg
+standard.error(Auto$mpg)
+
+# weight
+standard.error(Auto$weight)
+```
+
+As you can see, it's the same as when we typed it out earlier, and it's doing precisely the same thing.
+
+That said... we could also have calculated the standard error like this:
+
+```{r}
+sd(Auto$mpg)/sqrt(sum(!is.na(Auto$mpg)))
+
+sd(Auto$weight)/sqrt(sum(!is.na(Auto$weight)))
+```
+
+Well, this is actually how the pre-existing function `std.error()` works in the plotrix package:
+
+```{r}
+# install.packages('plotrix')
+library(plotrix)
+
+std.error(Auto$mpg)
+```
+
+let's take a look at the functions code:
+
+```{r}
+std.error
+```
+
+Yeesh, that's pretty confusing for doing the same thing as the `standard.error` function we made. Let's look at the documentation:
+
+```{r}
+?std.error
+```
+
+You can see that in the **Value** section it states:
+
+**The conventional standard error of the mean = `sd(x)/sqrt(sum(!is.na(x)))`**
+
+So let's try making a function with that here:
+```{r}
+our_SE_function <- function(x){
+  sd(x)/sqrt(sum(!is.na(x)))
+}
+```
+
+and now let's try it out:
+
+```{r}
+our_SE_function(Auto$mpg)
+our_SE_function(Auto$weight)
+
+
+# Look familiar?
+
+standard.error(Auto$mpg)
+standard.error(Auto$weight)
+
+std.error(Auto$mpg)
+std.error(Auto$weight)
+```
+
+### Ta da!
