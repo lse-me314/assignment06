@@ -3,17 +3,16 @@ title: "Exercise 6 - Resampling Methods and Model Selection"
 output: html_document
 ---
 
-## Exercise 6.1
+### Exercise 6.1
 
-In the lab session for this topic (Sections 5.3.2 and 5.3.3 in James et al.), we saw that the `cv.glm()` function can be used in order to compute the LOOCV test error estimate. Alternatively, one could compute those quantities using just the `glm()` and `predict.glm()` functions, and a `for` loop. You will now take this approach in order to compute the LOOCV error for a simple logistic regression model on the `Weekly` data set. Recall that in the context of classification problems, the LOOCV error is given in Section 5.1.5 (5.4, page 184).
+This question relates to the `College` dataset from the `ISLR` package.
 
-```{r}
-data("Weekly", package = "ISLR")
-```
+(a) Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform appropriate model selection of your choice (from day6) on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+(b) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+(c) Evaluate the model obtained on the test set, and explain the results obtained.
+(d) For which variables, if any, is there evidence of a non-linear relationship with the response?
 
- (a) Fit a logistic regression model that predicts `Direction` using `Lag1` and `Lag2`.
-
- (b) Fit a logistic regression model that predicts `Direction` using `Lag1` and `Lag2` using *all but the first observation*.
+### Exercise 6.2 
 
  (c) Use the model from (b) to predict the direction of the first observation. You can do this by predicting that the first observation will go up if `P(Direction="Up"|Lag1, Lag2) > 0.5`. Was this observation correctly classified?
 
@@ -58,4 +57,3 @@ data("Boston", package = "ISLR")
 (a) Try out some of the regression methods we explored, such as the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
 (b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
 (c) Does your chosen model involve all of the features in the data set? Why or why not?
-
