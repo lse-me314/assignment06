@@ -1,6 +1,5 @@
 ---
 title: "Exercise 6 - Resampling Methods and Model Selection"
-author: "Ken Benoit, Slava Mikhaylov, and Jack Blumenau"
 output: html_document
 ---
 
@@ -20,13 +19,13 @@ data("Weekly", package = "ISLR")
 
  (d) Write a `for` loop from i=1 to i=n, where n is the number of observations in the data set, that performs each of the following steps:
 
-    i. Fit a logistic regression model using all but the i-th observation to predict `Direction` using `Lag1` and `Lag2`.
+        1.  Fit a logistic regression model using all but the i-th observation to predict `Direction` using `Lag1` and `Lag2`.
     
-    ii. Compute the posterior probability of the market moving up for the i-th observation. 
+        2. Compute the posterior probability of the market moving up for the i-th observation. 
     
-    iii. Use the posterior probability for the i-th observation in order to predict whether or not the market moves up. 
+        3.  Use the posterior probability for the i-th observation in order to predict whether or not the market moves up. 
     
-    iv. Determine whether or not an error was made in predicting the direction for the i-th observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
+        4.  Determine whether or not an error was made in predicting the direction for the i-th observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
 
  (e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
 
