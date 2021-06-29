@@ -1,5 +1,5 @@
 ---
-title: "Exercise 6 - Resampling Methods and Model Selection"
+title: "Exercise 6 - Nonlinear Models and Tree-based Methods"
 output: html_document
 ---
 
@@ -7,53 +7,63 @@ output: html_document
 
 This question relates to the `College` dataset from the `ISLR` package.
 
+```{r, }
+library(ISLR)
+library(glmnet)
+library(leaps)
+```
+
 (a) Split the data into a training set and a test set. Using out-of-state tuition as the response and the other variables as the predictors, perform appropriate model selection of your choice (from day6) on the training set in order to identify a satisfactory model that uses just a subset of the predictors.
+
+```{r}
+set.seed(11)
+```
+
 (b) Fit a GAM on the training data, using out-of-state tuition as the response and the features selected in the previous step as the predictors. Plot the results, and explain your findings.
+
+```{r}
+library(gam)
+# non parametric regression - 
+gam.fit <-  gam
+```
+
 (c) Evaluate the model obtained on the test set, and explain the results obtained.
+
+```{r}
+# gam.pred <- predict()  # uncomment and modify appropriately
+```
+
 (d) For which variables, if any, is there evidence of a non-linear relationship with the response?
+
+```{r}
+# summary(gam.fit)
+```
+
 
 ### Exercise 6.2 
 
- (c) Use the model from (b) to predict the direction of the first observation. You can do this by predicting that the first observation will go up if `P(Direction="Up"|Lag1, Lag2) > 0.5`. Was this observation correctly classified?
+Apply bagging and random forests to a data set of your choice. Be sure to fit the models on a training set and to evaluate their performance on a test set. How accurate are the results compared to simple methods like linear or logistic regression? Which of these approaches yields the best performance?
 
- (d) Write a `for` loop from i=1 to i=n, where n is the number of observations in the data set, that performs each of the following steps:
-
-        1.  Fit a logistic regression model using all but the i-th observation to predict `Direction` using `Lag1` and `Lag2`.
-    
-        2. Compute the posterior probability of the market moving up for the i-th observation. 
-    
-        3.  Use the posterior probability for the i-th observation in order to predict whether or not the market moves up. 
-    
-        4.  Determine whether or not an error was made in predicting the direction for the i-th observation. If an error was made, then indicate this as a 1, and otherwise indicate it as a 0.
-
- (e) Take the average of the n numbers obtained in (d)iv in order to obtain the LOOCV estimate for the test error. Comment on the results.
-
-
-## Exercise 6.2
-
-In this exercise, we will predict the number of applications received using the other variables in the `College` data set.
-
+**In this exercise we examine the `Weekly` stock market data from the ISLR package.**
 ```{r}
-data("College", package = "ISLR")
+set.seed(1)
+summary(Weekly)
+# train <-  
+# test <-
 ```
 
-(a) Split the data set into a training set and a test set.
-(b) Fit a linear model using least squares on the training set, and
-report the test error obtained.
-(c) Fit a ridge regression model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained.
-(d) Fit a lasso model on the training set, with $\lambda$ chosen by cross-validation. Report the test error obtained, along with the number of non-zero coefficient estimates.
-(e) Fit a PCR model on the training set, with $M$ chosen by cross-validation. Report the test error obtained, along with the value of $M$ selected by cross-validation.
-(f) Comment on the results obtained. How accurately can we predict the number of college applications received? Is there much difference among the test errors resulting from these five approaches?
-
-
-## Exercise 6.3 (Optional)
-
-We will now try to predict per capita crime rate in the `Boston` data set.
-
+**Logistic regression**
 ```{r}
-data("Boston", package = "ISLR")
+
 ```
 
-(a) Try out some of the regression methods we explored, such as the lasso, ridge regression, and PCR. Present and discuss results for the approaches that you consider.
-(b) Propose a model (or set of models) that seem to perform well on this data set, and justify your answer. Make sure that you are evaluating model performance using validation set error, cross-validation, or some other reasonable alternative, as opposed to using training error.
-(c) Does your chosen model involve all of the features in the data set? Why or why not?
+**Bagging**
+```{r}
+
+```
+
+**Random forests**
+```{r}
+# rf.weekly <-  randomForest()
+```
+
