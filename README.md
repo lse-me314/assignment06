@@ -10,4 +10,3 @@ No special resources for this topic beyond the ones already listed on the course
 
 Work with the file [ME314_assignment6_LASTNAME_FIRSTNAME.Rmd](ME314_assignment6_LASTNAME_FIRSTNAME.Rmd).
 
-The TAs will spend a large amount of time on this today in class.
