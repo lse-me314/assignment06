@@ -216,4 +216,4 @@ table(yhat.bag, Weekly_test$Direction)
 mean(yhat.bag != Weekly_test$Direction)
 ```
 
-**Best performance summary: Bagging resulted in the lowest validation set test error rate in this example.**
+**Best performance summary: Bagging resulted in the lowest validation set test error rate in this example, but this needn't always be the case.**
