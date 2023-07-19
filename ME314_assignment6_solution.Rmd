@@ -1,0 +1,219 @@
+---
+title: "Exercise 6 - Nonlinear Models and Tree-based Methods"
+author: "Jack Blumenau"
+output: html_document
+---
+
+### Exercise 6.1
+
+This question relates to the `College` dataset from the `ISLR` package. Start by loading that package, as well as the `gam` package which will allow us to estimate generalised additive models, the `splines` package (which, unsurprisingly, let's us estimate splines), and the `randomForest` package (guess what that is for?).
+
+```{r, warning=FALSE, message = FALSE}
+
+library(ISLR)
+library(gam)
+library(splines)
+library(randomForest)
+
+```
+
+The `College` data contains several variables for 777 US Colleges in the 1990s. Look at the help file for this data set (`?College`) for a description of the variables that are included. 
+
+In this seminar, we will be experimenting with different approaches to estimating non-linear relationships between the `Expend` variable -- which measures the expenditure per student of each college (in dollars) -- and several other variables in the data.
+
+#### a. Create a series of plots which show the association between the `Expend` variable and the following four predictors: `Outstate`, ` PhD`, `Room.Board`, and `S.F.Ratio`. For which of these variables do you think there is evidence of a non-linear relationship?
+
+```{r}
+
+par(mfrow = c(2,2))
+plot(College$Outstate, College$Expend)
+plot(College$PhD, College$Expend)
+plot(College$Room.Board, College$Expend)
+plot(College$S.F.Ratio, College$Expend) 
+
+```
+
+It is a little hard to tell, but there is some evidence here that both `PhD` and `S.F.Ratio` are non-linearly related to the `Expend` variable. For the PhD variable, there is essentially no relationship between the percentage of faculty with a PhD and the expenditure variable for most of the range of X, but a positive relationship between the variables for the 80-100% range. The opposite is true for the student-faculty ratio variable, which is strongly negatively associated with the outcome for lower levels of X but mostly flat for higher levels of X.
+
+#### b. Estimate four regression models, all with `Expend` as the outcome variable, and each including one of the predictors you plotted above. Include a second-degree polynomial transformation of X in each of the models (you can do this by using `poly(x_variable,2)` in the `lm()` model formula). Interpret the significance of the squared term in each of your models. Can you reject the null hypothesis of linearity?
+
+```{r}
+
+summary(lm(Expend ~ poly(Outstate, 2), data = College))
+summary(lm(Expend ~ poly(PhD, 2), data = College))
+summary(lm(Expend ~ poly(Room.Board, 2), data = College))
+summary(lm(Expend ~ poly(S.F.Ratio, 2), data = College))
+
+```
+
+In fact, we can reject the null hypothesis of linearity for *all* of these variables! 
+
+
+#### c. Using the regression you estimated in part b to describe the association between `Expend` and `PhD`, calculate fitted values across the range of the `PhD` variable. Recreate the plot between these variable that you constructed in part a, and add a line representing these fitted values to the plot (using the `lines()` function) to illustrate the estimated relationship. Interpret the graph. (You will need to use the `predict()` function with the `newdata` argument in order to complete this question. You can also find the range of the `PhD` variable using the `range()` function.) I have given you some starter code below.
+
+
+```{r, echo = TRUE, eval = FALSE}
+
+fitted_vals_quadratic <- predict(phd_mod_quadratic, newdata = data.frame(PhD = SOME_VALUES_GO_HERE))
+
+plot(SOMETHING_GOES_HERE, SOMETHING_ELSE_GOES_HERE,
+     xlab = "Percentage of faculty with a PhD",
+     ylab = "Predicted Expenditure per Student")
+lines(SOME_VALUES_GO_HERE, SOME_OTHER_VALUES_GO_HERE, col = "red")
+
+```
+
+
+
+```{r}
+
+phd_mod_quadratic <- lm(Expend ~ poly(PhD, 2), data = College)
+range(College$PhD) # Find the range of the PhD variable
+fitted_vals_quadratic <- predict(phd_mod_quadratic, newdata = data.frame(PhD = 8:103))
+
+plot(College$PhD, College$Expend,
+     xlab = "Percentage of faculty with a PhD",
+     ylab = "Predicted Expenditure per Student")
+lines(8:103, fitted_vals_quadratic, col = "red")
+
+```
+
+The graph suggests that predicted expenditure per student decreases when moving from low to moderate percentages of faculty with PhDs, and then increases when moving from moderate to high percentages of faculty with PhDs.
+
+#### d. Re-estimate the `Expend ~ PhD` model, this time including a cubic polynomial (i.e. of degree 3). Can you reject the null hypothesis for the cubic term? Add another line (in a different colour) with the fitted values from this model to the plot you created in part c.
+
+```{r}
+
+
+phd_mod_cubic <- lm(Expend ~ poly(PhD, 3), data = College)
+summary(phd_mod_cubic) # Yes, we can reject the null
+
+fitted_vals_cubic <- predict(phd_mod_cubic, newdata = data.frame(PhD = 8:103))
+
+plot(College$PhD, College$Expend,
+     xlab = "Percentage of faculty with a PhD",
+     ylab = "Predicted Expenditure per Student")
+lines(8:103, fitted_vals_quadratic, col = "red")
+lines(8:103, fitted_vals_cubic, col = "green")
+
+
+```
+
+#### e. Estimate a new model for the relationship between `Expend` and `PhD`, this time using a cubic spline instead of a polynomial. You can implement the cubic spline by using the `bs()` function, which is specified thus: `lm(outcome ~ bs(x_variable, df = ?, degree = 3))`. Select a value for the `df` argument that you think is reasonable. Estimate the model and then, again, plot the fitted values across the range of the `PhD` variable. 
+
+```{r}
+
+
+phd_mod_spline <- lm(Expend ~ bs(PhD, df = 6, degree = 3), data = College)
+
+fitted_vals_spline <- predict(phd_mod_spline, newdata = data.frame(PhD = 8:103))
+
+plot(College$PhD, College$Expend,
+     xlab = "Percentage of faculty with a PhD",
+     ylab = "Predicted Expenditure per Student")
+lines(8:103, fitted_vals_quadratic, col = "red")
+lines(8:103, fitted_vals_cubic, col = "green")
+lines(8:103, fitted_vals_spline, col = "blue")
+
+
+```
+I have set `df = 6` which is likely too flexible for this data. Nevertheless, the general pattern is consistent with both the cubic and quadratic models.
+
+#### f. Guess what? Now it's time to do the same thing again, but this time using a `loess()` model. The key parameter here is the `span`. High values for `span` will result in a less flexible model, and low values for `span` will result in a more flexible model. Pick a value that you feel is appropriately wiggly. Again, add it to your (now very colourful) plot.
+
+
+```{r}
+
+
+phd_mod_loess <- loess(Expend ~ PhD, data = College, span = .1)
+
+fitted_vals_loess <- predict(phd_mod_loess, newdata = data.frame(PhD = 8:103))
+
+plot(College$PhD, College$Expend,
+     xlab = "Percentage of faculty with a PhD",
+     ylab = "Predicted Expenditure per Student")
+lines(8:103, fitted_vals_quadratic, col = "red")
+lines(8:103, fitted_vals_cubic, col = "green")
+lines(8:103, fitted_vals_spline, col = "blue")
+lines(8:103, fitted_vals_loess, col = "purple")
+
+
+```
+I have definitely over-wiggled here!
+
+#### g. Examine the nice plot you have constructed. Which of the lines of fitted values best characterise the relationship between `PhD` and `Expend` in the data? Can you tell?
+
+No, you cannot tell. It is very hard to work out which relationship is best fitting in this example just by looking at plots! Fortunately, tomorrow we will discuss a set of tool that allows us to work out which relationship is most appropriate by seeing which is best at predicting data out of sample.
+
+#### h. Fit a generalised additive model (GAM) to the `College` data using the `gam()` function. This model is just like the `lm()` function, but it allows you to include flexible transformations of the covariates in the model. In this example, estimate a GAM with `Expend` as the outcome, and use all four of predictors that you plotted in part a as well as the `Private` variable. For each of the continuous predictors, use a cubic spline (`bs()`) with 4 degrees of freedom. Once you have estimated your model, plot the results by passing the estimated model object to the `plot()` function. Interpret the results.
+
+```{r}
+library(gam)
+gam_mod <-  gam(Expend ~ Private + bs(PhD, df=4) + 
+                  bs(Outstate, df=4) + bs(Room.Board, df=4) + 
+                  bs(S.F.Ratio, df=4) ,
+                data=College)
+
+par(mfrow=c(2, 3))
+plot(gam_mod, se=TRUE, col="blue")
+```
+
+### Tree-based methods
+
+Apply bagging and random forests to the `Weekly` data set. This dataset includes Weekly percentage returns for the S&P 500 stock index between 1990 and 2010. Your goal is to predict the `Direction` variable, which has two levels (Down and Up). For this task, you should fit the models on a randomly selected subset of your data -- the training set -- and evaluate their performance on the rest of the data -- the test set. I have given you some code below to help you construct these datasets. How accurate are the results compared to simpler methods like logistic regression? Which of these approaches yields the best performance?
+
+```{r}
+
+set.seed(3) # Set a value for the random number generator to make the results comparable across runs
+train <-  sample(nrow(Weekly), 2/3 * nrow(Weekly)) # Randomly select two-thirds of the data
+Weekly_train <- Weekly[train,] # Subset to the training observations
+Weekly_test <- Weekly[-train,] # Subset to the test observations
+
+```
+
+**Logistic regression**
+
+```{r}
+
+glm.fit <-  glm(Direction ~ . -Year-Today, 
+                data=Weekly_train, 
+                family="binomial")
+
+glm.probs <-  predict(glm.fit, newdata=Weekly_test, 
+                      type = "response")
+
+glm.pred <-  rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] <-  "Up"
+table(glm.pred, Weekly_test$Direction)
+mean(glm.pred != Weekly_test$Direction)
+```
+
+**Bagging**
+
+```{r}
+
+library(randomForest)
+
+bag.weekly <-  randomForest(Direction~.-Year-Today, 
+                            data=Weekly_train, 
+                            mtry=6)
+
+yhat.bag <-  predict(bag.weekly, newdata=Weekly_test)
+table(yhat.bag, Weekly_test$Direction)
+mean(yhat.bag != Weekly_test$Direction)
+```
+
+**Random forests**
+
+```{r}
+
+rf.weekly <-  randomForest(Direction ~ . -Year-Today, 
+                           data=Weekly_train, 
+                           mtry=2)
+
+yhat.bag <-  predict(rf.weekly, newdata=Weekly_test)
+table(yhat.bag, Weekly_test$Direction)
+mean(yhat.bag != Weekly_test$Direction)
+```
+
+**Best performance summary: Bagging resulted in the lowest validation set test error rate in this example.**
