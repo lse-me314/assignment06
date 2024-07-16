@@ -1,10 +1,10 @@
 ---
-title: "Exercise 6 - Nonlinear Models and Tree-based Methods"
+title: "Exercise 6 - Non-linear Models and Tree-based Methods"
 author: "Jack Blumenau"
 output: html_document
 ---
 
-### Non-linear models
+### Exercise 6.1: Non-linear Models
 
 This question relates to the `College` dataset from the `ISLR` package. Start by loading that package, as well as the `gam` package which will allow us to estimate generalised additive models, the `splines` package (which, unsurprisingly, let's us estimate splines), and the `randomForest` package (guess what that is for?).
 
@@ -21,12 +21,13 @@ The `College` data contains several variables for 777 US Colleges in the 1990s. 
 
 In this seminar, we will be experimenting with different approaches to estimating non-linear relationships between the `Expend` variable -- which measures the expenditure per student of each college (in dollars) -- and several other variables in the data.
 
-#### a. Create a series of scatter plots which show the association between the `Expend` variable and the following four predictors: `Outstate`, ` PhD`, `Room.Board`, and `S.F.Ratio`. For which of these variables do you think there is evidence of a non-linear relationship?
+#### a. Create a series of plots which show the association between the `Expend` variable and the following four predictors: `Outstate`, ` PhD`, `Room.Board`, and `S.F.Ratio`. For which of these variables do you think there is evidence of a non-linear relationship?
 
 
 #### b. Estimate four regression models, all with `Expend` as the outcome variable, and each including one of the predictors you plotted above. Include a second-degree polynomial transformation of X in each of the models (you can do this by using `poly(x_variable,2)` in the `lm()` model formula). Interpret the significance of the squared term in each of your models. Can you reject the null hypothesis of linearity?
 
-#### c. Using the regression you estimated in part b to describe the association between `Expend` and `PhD`, calculate fitted values across the range of the `PhD` variable. Recreate the plot between these variables that you constructed in part a, and add a line representing these fitted values to the plot (using the `lines()` function) to illustrate the estimated relationship. Interpret the graph. (You will need to use the `predict()` function with the `newdata` argument in order to complete this question. You can also find the range of the `PhD` variable using the `range()` function.) I have given you some starter code below.
+
+#### c. Using the regression you estimated in part b to describe the association between `Expend` and `PhD`, calculate fitted values across the range of the `PhD` variable. Recreate the plot between these variable that you constructed in part a, and add a line representing these fitted values to the plot (using the `lines()` function) to illustrate the estimated relationship. Interpret the graph. (You will need to use the `predict()` function with the `newdata` argument in order to complete this question. You can also find the range of the `PhD` variable using the `range()` function.) I have given you some starter code below.
 
 
 ```{r, echo = TRUE, eval = FALSE}
@@ -40,29 +41,66 @@ lines(SOME_VALUES_GO_HERE, SOME_OTHER_VALUES_GO_HERE, col = "red")
 
 ```
 
+
+The graph suggests that predicted expenditure per student decreases when moving from low to moderate percentages of faculty with PhDs, and then increases when moving from moderate to high percentages of faculty with PhDs.
+
 #### d. Re-estimate the `Expend ~ PhD` model, this time including a cubic polynomial (i.e. of degree 3). Can you reject the null hypothesis for the cubic term? Add another line (in a different colour) with the fitted values from this model to the plot you created in part c.
 
-
 #### e. Estimate a new model for the relationship between `Expend` and `PhD`, this time using a cubic spline instead of a polynomial. You can implement the cubic spline by using the `bs()` function, which is specified thus: `lm(outcome ~ bs(x_variable, df = ?, degree = 3))`. Select a value for the `df` argument that you think is reasonable. Estimate the model and then, again, plot the fitted values across the range of the `PhD` variable. 
-
 
 #### f. Guess what? Now it's time to do the same thing again, but this time using a `loess()` model. The key parameter here is the `span`. High values for `span` will result in a less flexible model, and low values for `span` will result in a more flexible model. Pick a value that you feel is appropriately wiggly. Again, add it to your (now very colourful) plot.
 
 
 #### g. Examine the nice plot you have constructed. Which of the lines of fitted values best characterise the relationship between `PhD` and `Expend` in the data? Can you tell?
 
+
 #### h. Fit a generalised additive model (GAM) to the `College` data using the `gam()` function. This model is just like the `lm()` function, but it allows you to include flexible transformations of the covariates in the model. In this example, estimate a GAM with `Expend` as the outcome, and use all four of predictors that you plotted in part a as well as the `Private` variable. For each of the continuous predictors, use a cubic spline (`bs()`) with 4 degrees of freedom. Once you have estimated your model, plot the results by passing the estimated model object to the `plot()` function. Interpret the results.
 
-### Tree-based methods
+### Exercise 6.2: Tree-based methods
 
-Apply a) bagging and b) Random Forests to the `Weekly` data set. This dataset includes Weekly percentage returns for the S&P 500 stock index between 1990 and 2010. Your goal is to predict the `Direction` variable, which has two levels (Down and Up). For this task, you should fit the models on a randomly selected subset of your data -- the training set -- and evaluate their performance on the rest of the data -- the test set. I have given you some code below to help you construct these datasets. How accurate are the results compared to simpler methods like logistic regression? Which of these approaches yields the best performance?
+In this question you will use data on UK parliamentary constituencies to predict the vote share won by the Conservative Party in the 2019 general election. Load the data using the following code:
 
-```{r, echo = TRUE, eval = TRUE}
+```{r, echo = FALSE}
 
-set.seed(3) # Set a value for the random number generator to make the results comparable across runs
-train <-  sample(nrow(Weekly), 2/3 * nrow(Weekly)) # Randomly select two-thirds of the data
-Weekly_train <- Weekly[train,] # Subset to the training observations
-Weekly_test <- Weekly[-train,] # Subset to the test observations
+bes19 <- read.csv("~/Desktop/bes19.csv")
+
+```
+
+The `bes19` data contains 631 rows and 16 columns. Each row represents a parliamentary consituency in Great Britain, and the columns include information about each of these constituencies. We are interested in predicting the `Con19` column, which indicates the percentage of the popular vote won by the Conservative candidate in the relevant constituency. 
+
+The other variables in this data are measures taken from the census, which measure a range of factors including the fraction of the constituency's population that was born in England, the fraction with higher-level qualifications, the fraction long term unemployed, the religious composition of the constituency, and so on. We will use these covariates to predict the Conservative vote share in each seat.
+
+
+#### a. For this task, you should fit the models on a randomly selected subset of your data -- the training set -- and evaluate their performance on the rest of the data -- the test set. Use the code below to create the train- and test-set. I have written the code below to help set up the data for use in this task. Your job in this question is to use some R comments to describe what every line of code does.
+
+```{r}
+
+set.seed(0112358) #
+train <-  sample(nrow(bes19), 2/3 * nrow(bes19)) # 
+bes19_train <- bes19[train,] #
+bes19_test <- bes19[-train,] # 
+
+```
+
+#### b. Train a linear regression model using the `bes19_train` data, predicting `Con19` as a function of all of the other variables in the data. Use this model to generate fitted values (use the `predict()` function) for the **test** data (`bes19_test`).  Create a plot which compares these fitted values to the true values for `Con19` for the test data.
+
+#### b. Now repeat this prediction task, but this time use a bagging model as implemented using the `randomForest()` function from the `library(randomForest)` package. Again, you should train your model on the `bes19_train` data, and predict for the `bes19_test` data (you can calculate predicted values from the bagging model using the `predict()` function that you used in the previous question). 
+
+*Note:* There are four important arguments that you need to include in the `randomForest()` function:
+
+1. `formula` -- the formula for the model you wish to estimate, indicating the relevant outcome variable and the relevant predictors. Here, your outcome variable is `Con19` and you want to include all predictors, so you can just use `Con19 ~ .` for this argument.
+2. `data` -- the dataset you wish to use to estimate the model.
+3. `mtry` -- the number of variables randomly sampled at each split of the tree. Remember, for bagging this should be equal to the total number of predictors, while for a random forest model it should be a lower number.
+4. `na.action` -- this argument deals with missing data. Set it to `na.action = na.omit` to omit any observation with incomplete data.
+
+
+#### c. Repeat this prediction task for a final time, this time using a randomForest model. As for the bagging approach, you can use the `randomForest()` function, but you will need to make a different choice for the `mtry` argument (remember that for a random forest model a good rule of thumb is $m \approx \sqrt{p}$). You should once more train the model on the training data, and predict for the test-set data.
+
+#### d. Which of these models does the best job of predicting Conservative vote share out of sample? Use the function below to calculate the root-mean-squared error (RMSE) for each set of test-set predictions. Report this quantity for the linear model, the bagging model, and the random forest model and report the best performing model according to this metric.
+
+```{r}
+
+rmse <- function(predicted, actual) sqrt(mean((predicted - actual)^2))
 
 ```
 
