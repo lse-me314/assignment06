@@ -42,7 +42,6 @@ lines(SOME_VALUES_GO_HERE, SOME_OTHER_VALUES_GO_HERE, col = "red")
 ```
 
 
-The graph suggests that predicted expenditure per student decreases when moving from low to moderate percentages of faculty with PhDs, and then increases when moving from moderate to high percentages of faculty with PhDs.
 
 #### d. Re-estimate the `Expend ~ PhD` model, this time including a cubic polynomial (i.e. of degree 3). Can you reject the null hypothesis for the cubic term? Add another line (in a different colour) with the fitted values from this model to the plot you created in part c.
 
@@ -60,18 +59,18 @@ The graph suggests that predicted expenditure per student decreases when moving 
 
 In this question you will use data on UK parliamentary constituencies to predict the vote share won by the Conservative Party in the 2019 general election. Load the data using the following code:
 
-```{r, echo = FALSE}
+```{r, echo = TRUE}
 
-bes19 <- read.csv("~/Desktop/bes19.csv")
+bes19 <- read.csv("https://raw.githubusercontent.com/lse-me314/assignment06/master/bes19.csv")
 
 ```
 
 The `bes19` data contains 631 rows and 16 columns. Each row represents a parliamentary consituency in Great Britain, and the columns include information about each of these constituencies. We are interested in predicting the `Con19` column, which indicates the percentage of the popular vote won by the Conservative candidate in the relevant constituency. 
 
-The other variables in this data are measures taken from the census, which measure a range of factors including the fraction of the constituency's population that was born in England, the fraction with higher-level qualifications, the fraction long term unemployed, the religious composition of the constituency, and so on. We will use these covariates to predict the Conservative vote share in each seat.
+The other variables in this data are measures taken from the census, which capture a range of factors including the fraction of the constituency's population that was born in England, the fraction with higher-level qualifications, the fraction long term unemployed, the religious composition of the constituency, and so on. We will use these covariates to predict the Conservative vote share in each seat.
 
 
-#### a. For this task, you should fit the models on a randomly selected subset of your data -- the training set -- and evaluate their performance on the rest of the data -- the test set. Use the code below to create the train- and test-set. I have written the code below to help set up the data for use in this task. Your job in this question is to use some R comments to describe what every line of code does.
+#### a. For this task, you should fit the models on a randomly selected subset of your data -- the training set -- and evaluate their performance on the rest of the data -- the test set. Use the code below to create the train- and test-set. Your job in this question is to use some R comments to describe what every line of code does.
 
 ```{r}
 
